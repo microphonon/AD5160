@@ -115,35 +115,35 @@ __interrupt void USCI_A1_ISR(void)
 
 void SetPins(void)
   {
-	 	PM5CTL0 &= ~LOCKLPM5; //Unlocks GPIO pins at power-up
-	 	/* Port 1
- 	  	P1.0 Green LED
- 	  	P1.1 Launchpad switch
- 	  	P1.5 Chip select.  Pull this line low to enable AD5160 communication
- 	    P1.6 MOSI
- 	    P1.7 MISO
- 	    */
- 	    P1DIR |= BIT0 + BIT1 + BIT2 + BIT3 + BIT4 + BIT5;
- 	    P1SEL1 |= BIT6 + BIT7; //Configure pins for SPI on UCB0
- 	    P1OUT &= ~BIT0; //LED off
+	PM5CTL0 &= ~LOCKLPM5; //Unlocks GPIO pins at power-up
+	/* Port 1
+ 	P1.0 Green LED
+ 	P1.1 Launchpad switch
+ 	P1.5 Chip select.  Pull this line low to enable AD5160 communication
+ 	P1.6 MOSI
+ 	P1.7 MISO
+ 	*/
+ 	P1DIR |= BIT0 + BIT1 + BIT2 + BIT3 + BIT4 + BIT5;
+ 	P1SEL1 |= BIT6 + BIT7; //Configure pins for SPI on UCB0
+ 	P1OUT &= ~BIT0; //LED off
 
- 	    /* Port 2
- 	    P2.1  Button on Launchpad
- 	    P2.2 SPI CLK
- 	    P2.5 TXD UART
- 	    P2.6 RXD UART
- 		*/
- 	   	P2DIR |= BIT0 + BIT1 + BIT2 + BIT3 + BIT4 + BIT7;
- 	    P2SEL1 |= BIT2 + BIT5 + BIT6; //Configure pins for SPI CLK; UART on UCA1
+	/* Port 2
+ 	P2.1  Button on Launchpad
+ 	P2.2 SPI CLK
+ 	P2.5 TXD UART
+ 	P2.6 RXD UART
+	*/
+ 	P2DIR |= BIT0 + BIT1 + BIT2 + BIT3 + BIT4 + BIT7;
+ 	P2SEL1 |= BIT2 + BIT5 + BIT6; //Configure pins for SPI CLK; UART on UCA1
 
- 	    /* Port 3 */
- 	    P3DIR |=  BIT0 + BIT1 + BIT3 + BIT4 + BIT5 + BIT6 + BIT7;
+ 	/* Port 3 */
+ 	P3DIR |=  BIT0 + BIT1 + BIT3 + BIT4 + BIT5 + BIT6 + BIT7;
 
- 	    /* Port 4
- 	   	P4.6 Red LED
- 	   	*/
- 	    P4DIR |= BIT0 + BIT1 + BIT2 + BIT3 + BIT4 + BIT5 + BIT6 + BIT7;
- 	    P4OUT &= ~BIT6; //LED off
+ 	/* Port 4
+ 	P4.6 Red LED
+ 	*/
+ 	P4DIR |= BIT0 + BIT1 + BIT2 + BIT3 + BIT4 + BIT5 + BIT6 + BIT7;
+ 	P4OUT &= ~BIT6; //LED off
   }
 
  void SetUART(void) //UCA1 module; use RX interrupt
@@ -172,22 +172,22 @@ void SetPins(void)
 
  void DigPot(uint8_t trimpot) //Send single byte (in decimal) to dig pot via SPI
   {
-	 	volatile unsigned char LoopBack;
-	 	volatile uint8_t R[] = {0,26,51,77,102,128,154,179,205,230,255};
+	volatile unsigned char LoopBack;
+	volatile uint8_t R[] = {0,26,51,77,102,128,154,179,205,230,255};
 
- 	 	P1OUT &= ~BIT5; //Pull select line low on P1.5
- 	 	UCB0STAT |= UCLISTEN;  //Enable loopback mode since no MISO line
- 	 	UCB0CTL1 &= ~UCSWRST; //Start USCI
+ 	P1OUT &= ~BIT5; //Pull select line low on P1.5
+ 	UCB0STAT |= UCLISTEN;  //Enable loopback mode since no MISO line
+ 	UCB0CTL1 &= ~UCSWRST; //Start USCI
 
- 	 	while (!(UCB0IFG & UCTXIFG)); //Check if it is OK to write
- 		UCB0TXBUF = R[trimpot]; //Load data into transmit buffer
+ 	while (!(UCB0IFG & UCTXIFG)); //Check if it is OK to write
+ 	UCB0TXBUF = R[trimpot]; //Load data into transmit buffer
 
- 		while (!(UCB0IFG & UCRXIFG)); //Wait until complete RX byte is received
- 		LoopBack = UCB0RXBUF; //Read buffer to clear RX flag
+ 	while (!(UCB0IFG & UCRXIFG)); //Wait until complete RX byte is received
+ 	LoopBack = UCB0RXBUF; //Read buffer to clear RX flag
 
- 		UCB0CTL1 |= UCSWRST; //Stop USCI
- 		UCB0STAT &= ~UCLISTEN;  //Disable loopback mode
- 	 	P1OUT |= BIT5; //De-select digi pot on SPI
+ 	UCB0CTL1 |= UCSWRST; //Stop USCI
+ 	UCB0STAT &= ~UCLISTEN;  //Disable loopback mode
+ 	P1OUT |= BIT5; //De-select digi pot on SPI
   }
 
  void Invalid(void)
